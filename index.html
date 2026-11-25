@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>معمل الجملة العربية</title>
+<style>
+*{box-sizing:border-box}body{margin:0;background:#faf6ed;color:#163f37;font:1.15rem/1.8 "DM Sans",Tahoma,sans-serif}main{max-width:680px;margin:8vh auto;padding:24px}article{padding:24px;background:white;border:1px solid #d8dfd5;border-radius:16px}select,input,button{font:inherit;padding:8px 14px;border:1px solid #819a90;border-radius:8px}input,select{width:100%;margin:8px 0 16px}button{cursor:pointer;background:#145849;color:white;margin:4px}#result{min-height:2em}h1{line-height:1.3}small{color:#435e54}
+</style>
+<main><h1>معمل الجملة العربية</h1><label>نوع التدريب<select id="mode"><option value="order">ترتيب الكلمات</option><option value="tense">تحويل الزمن</option></select></label>
+<article><small id="count"></small><h2 id="prompt"></h2><p id="clue" lang="en" dir="ltr"></p><form id="exercise"><label>إجابتك<input id="answer" autocomplete="off" required></label><button>تحقّق</button></form><p id="result" role="status"></p><button id="reveal">اعرض إجابة نموذجية</button><button id="next">التمرين التالي</button></article></main>
+<script>
+const lessons = {
+  order: [
+    ["إلى • أذهب • المدرسة", "I go to school.", "أذهب إلى المدرسة"],
+    ["كتابا • أقرأ • جديدا", "I read a new book.", "أقرأ كتابا جديدا"],
+    ["المعلم • الدرس • يشرح", "The teacher explains the lesson.", "يشرح المعلم الدرس", "المعلم يشرح الدرس", "يشرح الدرس المعلم"],
+    ["الصباح • القهوة • في • أشرب", "I drink coffee in the morning.", "أشرب القهوة في الصباح", "في الصباح أشرب القهوة", "أشرب في الصباح القهوة"]
+  ],
+  tense: [
+    ["حوّل إلى الماضي «أكتب رسالة»", "Yesterday I wrote a letter.", "كتبت رسالة"],
+    ["حوّل إلى المضارع «شربنا الماء»", "We drink water.", "نشرب الماء"],
+    ["حوّل إلى المستقبل «يقرأ الطالب الكتاب»", "The student will read the book.", "سيقرأ الطالب الكتاب", "سوف يقرأ الطالب الكتاب", "الطالب سيقرأ الكتاب", "الطالب سوف يقرأ الكتاب"],
+    ["حوّل إلى المستقبل «ذهبت إلى العمل» بضمير أنا", "I will go to work.", "سأذهب إلى العمل", "سوف أذهب إلى العمل"]
+  ]
+};
+const el = id => document.getElementById(id);
+function normalize(text) {
+  return text.normalize("NFC").replace(/[\u064b-\u0652\u0670ـ]/g, "").replace(/[.،!؟]+$/g, "").trim().replace(/\s+/g, " ");
+}
+let position = 0;
+const group = () => lessons[el("mode").value];
+function show() {
+  const [prompt, clue] = group()[position];
+  el("count").textContent = (position + 1) + " / " + group().length;
+  el("prompt").textContent = prompt;
+  el("clue").textContent = clue;
+  el("answer").value = "";
+  el("result").textContent = "";
+}
+el("exercise").onsubmit = event => {
+  event.preventDefault();
+  const answers = group()[position].slice(2);
+  el("result").textContent = answers.some(a => normalize(a) === normalize(el("answer").value)) ? "إجابة صحيحة!" : "جرّب صياغة أخرى أو اعرض الإجابة النموذجية.";
+};
+el("reveal").onclick = () => { el("result").textContent = group()[position][2]; };
+el("next").onclick = () => { position = (position + 1) % group().length; show(); el("answer").focus(); };
+el("mode").onchange = () => { position = 0; show(); };
+show();
+</script></html>
